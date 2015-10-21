@@ -2,7 +2,7 @@ schema-version: 1.0.0
 application-family: CMS
 application-name: WordPress
 application-version: latest
-flavor: Single Linux server
+flavor: Low Traffic
 flavor-weight: 2
 popularity: 2
 reach-info:
