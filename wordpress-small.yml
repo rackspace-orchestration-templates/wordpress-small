@@ -32,7 +32,7 @@ parameters:
   # Server settings
   server_hostname:
     label: Server Name
-    description: Hostname to use for the server that's built.
+    description: Hostname to use for the server that's built.'
     type: string
     default: WordPress
     constraints:
@@ -120,12 +120,6 @@ resources:
       length: 16
       sequence: lettersdigits
 
-  mysql_root_password:
-    type: "OS::Heat::RandomString"
-    properties:
-      length: 16
-      sequence: lettersdigits
-
   ssh_key:
     type: "OS::Nova::KeyPair"
     properties:
@@ -172,9 +166,6 @@ resources:
                   - apache
                   - memcached
                   - mysql
-                  - mysql.database
-                  - mysql.user
-                  - mysql.grant
                   - php
                   - varnish
                   - wordpress
@@ -212,10 +203,8 @@ resources:
                           inline: yes
                           level: 1
                         "mysql:client":
-                          user: root
-                          password: %mysql_root_password%
-                  mysql:
-                    root_password: %mysql_root_password%
+                          user: %wp_user%
+                          password: %database_password%%
                   mysql-database:
                     name: %db_name%
                   mysql-grant:
@@ -247,7 +236,7 @@ resources:
                     domain: %url%
                     user: %wp_user%
                     pass: %database_password%
-                    db_host: localhost
+                    db_host: %wp_dbhost%
                     db_name: %db_name%
                     db_user: %wp_user%
                     db_pass: %database_password%
@@ -258,13 +247,13 @@ resources:
                   "%url%": { get_param: domain }
                   "%destination%": "/var/www/vhosts"
                   "%public%": { get_param: domain }
-                  "%mysql_root_password%": { get_attr: [mysql_root_password, value] }
                   "%db_name%": { get_param: database_name }
                   "%wp_user%": { get_param: username }
                   "%database_password%": { get_attr: [database_password, value] }
                   "%varnish_port%": 80
                   "%vsftpd_pasv_min_port%": 10050
                   "%vsftpd_pasv_max_port%": 10100
+                  "%wp_dbhost%": { get_attr: [wordpress_database, hostname] }
         # Salt Bootstrap script
           - path: /tmp/heat/salt_run.sh
             permissions: '0500'
@@ -297,6 +286,27 @@ resources:
                   "%vsftpd_pasv_max_port%": 10100
         runcmd:
           - /tmp/heat/salt_run.sh
+
+  wordpress_database:
+    type: OS::Trove::Instance
+    properties:
+      name:
+        str_replace:
+          template: stack-db
+          params:
+            stack: { get_param: "OS::stack_name" }
+      datastore_type: mysql
+      datastore_version: "5.6"
+      flavor: 1GB Instance
+      size: 5
+      databases:
+        - name: { get_param: database_name }
+      users:
+        - name: { get_param: username }
+          password: { get_attr: [database_password, value] }
+          databases:
+          - { get_param: database_name }
+
 
   # Server resources
   wordpress_server:
@@ -341,6 +351,10 @@ outputs:
   server_ip:
     description: Server IP
     value: { get_attr: [wordpress_server, accessIPv4] }
+  
+  loadbalancer_ip:
+    description: Load Balancer IP
+    value: { get_attr: [load_balancer, PublicIp] }
 
   domain:
       description: domain for wordpress configuration
@@ -353,7 +367,3 @@ outputs:
   wordpress_password:
     description: WordPress Password
     value: { get_attr: [database_password, value] }
-
-  mysql_root_password:
-    description: MySQL Root Password
-    value: { get_attr: [mysql_root_password, value] }
