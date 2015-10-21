@@ -91,11 +91,9 @@ instructions: |
   FTP.
 
   [MySQL](http://www.mysql.com/) is the database backend used in this
-  deployment. The MySQL root password is included in the password section of
-  this deployment. If you do lose the password, it is also available in
-  /root/.my.cnf. MySQL backups are performed locally by
-  [Holland](http://wiki.hollandbackup.org/). The backups will be stored in
-  /var/spool/holland.
+  deployment, and is hosted on Cloud Databases.  MySQL backups are performed
+  locally by [Holland](http://wiki.hollandbackup.org/). The backups will be
+  stored in /var/spool/holland.
 
   #### Logging in via SSH
   The private key provided in the passwords section can be used to login as
@@ -121,7 +119,7 @@ description: |
   [WordPress v3.9.2](http://wordpress.org/about/),
   [Apache](http://httpd.apache.org/),
   [vsftpd](https://security.appspot.com/vsftpd.html#about),
-  [Varnish](https://www.varnish-cache.org/about) and
-  [MySQL 5.5](http://www.mysql.com/about/).
+  [Varnish](https://www.varnish-cache.org/about),
+  with a Cloud Load Balancer and Cloud Database as the backend.
   There is not an automatic way to add additional nodes to this deployment.
   This deployment is meant for lower traffic or testing scenarios.
