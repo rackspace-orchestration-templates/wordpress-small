@@ -1,4 +1,4 @@
-[![Circle CI](https://circleci.com/gh/rackspace-orchestration-templates/wordpress-single/tree/master.png?style=shield)](https://circleci.com/gh/rackspace-orchestration-templates/wordpress-single/tree/master)
+[![Circle CI](https://circleci.com/gh/rackspace-orchestration-templates/wordpress-small/tree/master.png?style=shield)](https://circleci.com/gh/rackspace-orchestration-templates/wordpress-small/tree/master)
 Description
 ===========
 
