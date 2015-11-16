@@ -282,7 +282,7 @@ resources:
       Inclusions:
       - FilePath: "/var/spool/holland"
         FileItemType: "Folder"
-      - FilePath: "/var/www/"
+      - FilePath: "/var/www"
         FileItemType: "Folder"
       NotifyFailure: true
       NotifyRecipients: { get_param: wordpress_email }
