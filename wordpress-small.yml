@@ -300,7 +300,7 @@ resources:
     properties:
       count: { get_param: server_count }
       resource_def:
-        type: https://raw.githubusercontent.com/chrishultin/ansible-templates/master/Wordpress-Test-Slave.yaml
+        type: https://github.com/rackspace-orchestration-templates/wordpress-small/blob/master/wordpress-small-secondary.yaml
         properties:
           ssh_key: { get_resource: ssh_key }
           parent_stack_id: { get_param: "OS::stack_id" }
