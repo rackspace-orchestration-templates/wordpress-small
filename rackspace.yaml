@@ -2,7 +2,7 @@ schema-version: 1.0.0
 application-family: CMS
 application-name: WordPress
 application-version: latest
-flavor: Low Traffic
+flavor: Production
 flavor-weight: 2
 popularity: 2
 reach-info:
@@ -10,9 +10,10 @@ reach-info:
   icon-20x20: https://0b5294b243620310a700-e388a7f3aba385a925111b1fc6f680d4.ssl.cf2.rackcdn.com/wordpress-icon-20x20.png
   rackspace-supported: true
 hidden_outputs:
-  - private_key
-  - wordpress_password
-  - mysql_root_password
+  - wordpress_login_user
+  - wordpress_login_password
+  - mysql_user
+  - mysql_password
 abstract: |
   WordPress is a flexible, powerful and open-source content management system
   written in PHP.
@@ -23,8 +24,8 @@ instructions: |
   documentation will step you through the process of logging into the admin
   panel, customizing your blog, and changing your theme.
 
-  You can find the admin Username and Password listed as "WordPress Admin User"
-  and "WordPress Admin Password", respectively.
+  After the stack has been create, you can find the admin username and
+  password listed in the "Credentials" section of Stack Details.
 
   The [WordPress Lessons](http://codex.wordpress.org/WordPress_Lessons) cover a
   wide range of topics for users and designers.
@@ -70,8 +71,8 @@ instructions: |
   #### Details of Your Setup
   This deployment waws stood up using [Ansible](http://www.ansible.com/).
   Once the deployment is up, Ansible will not run again unless you update the
-  stack.  Any changes made to the configuration may be overwritten when the stack
-  is updated.
+  stack. **Any changes made to the configuration may be overwritten when the stack
+  is updated.**
 
   WordPress itself was installed using [WP-CLI](http://wp-cli.org/). WordPress
   is installed in /var/www/vhosts/YOUR DOMAIN/ and served by [Apache](http://httpd.apache.org/).
@@ -95,11 +96,10 @@ instructions: |
   these backups for 30 days.
 
   In order to restore the Database from backup, you will need to first restore
-  /var/spool/holland from the appropraite backup.  After you have done so, you
-  will need to log into the Master server, then run the following commands:
-
-  gunzip /var/spool/holland/default/newest/backup_data/all_databases.sql.gz 
-  mysql < /var/spool/holland/default/newest/backup_data/all_databases.sql
+  /var/spool/holland from the appropriate Cloud Backup.  After you have done so,
+  you will need to log into the Master server and restore the Holland backup
+  to the Cloud Database via the MySQL client.  For more assistance, please
+  contact your Support team.
 
   Monitoring is configured to verify that Apache is running on both the Master
   and all secondary servers, as well as that the Cloud Load Balancer is
