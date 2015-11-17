@@ -1,0 +1,398 @@
+heat_template_version: 2015-10-15
+
+description: |
+ #### Production
+ 
+ This stack is intended for low to medium traffic production
+ websites and can be scaled as needed to accomodate future
+ growth.  This stack includes a Cloud Load Balancer, Cloud
+ Database, and a Master server (plus optional secondary
+ servers).  It also includes Cloud Monitoring and Cloud
+ Backups.
+
+ This stack is running the latest version of
+ [WordPress](http://wordpress.org/about/),
+ [Apache](http://httpd.apache.org/),
+ and [PHP](http://php.net/).
+ with a Cloud Database running
+ [MySQL 5.6](http://www.mysql.com/about/).
+
+parameter_groups:
+- label: WordPress Settings
+  parameters:
+  - wordpress_url
+  - wordpress_sitename
+  - wordpress_user
+  - wordpress_email
+
+parameters:
+  #WordPress Customization
+  wordpress_url:
+    type: string
+    default: example.com
+    label: Site Domain
+    description: Domain to use with WordPress Site
+    constraints:
+    - allowed_pattern: "^[a-zA-Z0-9.-]{1,255}.[a-zA-Z]{2,15}$"
+      description: Must be a valid domain name
+  wordpress_sitename:
+    type: string
+    default: Example Site
+    label: Site Title
+    description: Title to use for WordPress Site
+  wordpress_user:
+    type: string
+    default: admin
+    label: WordPress Admin Username
+    description: Username for WordPress login
+    constraints:
+    - allowed_pattern: "^[a-zA-Z0-9]*$"
+      description: Only can contain A-Z and 0-9
+  wordpress_email:
+    type: string
+    default: admin@example.com
+    label: WordPress Admin E-mail
+    description: E-mail Address for WordPress Admin User
+  #Advanced Options
+  server_flavor:
+    type: string
+    default: 4 GB General Purpose v1
+    label: Server Flavor
+    description: Flavor of Cloud Server to use for WordPress
+    constraints:
+    - allowed_values:
+      - 2 GB General Purpose v1
+      - 4 GB General Purpose v1
+      - 8 GB General Purpose v1
+  server_image:
+    type: string
+    default: 96a06fc9-c230-422c-81d4-562f97517a5b
+    label: Server Image
+    description: Image to use for WordPress
+    constraints:
+    - allowed_values:
+      - 96a06fc9-c230-422c-81d4-562f97517a5b
+  server_count:
+    type: number
+    default: 0
+    label: Number of Secondary Servers
+    description: Number of secondary web nodes
+    constraints:
+      - range: { min: 0, max: 10 }
+
+resources:
+  #Passwords
+  wordpress_pass:
+    type: OS::Heat::RandomString
+  database_pass:
+    type: OS::Heat::RandomString
+  holland_pass:
+    type: OS::Heat::RandomString
+  #SSH Key
+  ssh_key:
+    type: OS::Nova::KeyPair
+    properties:
+      name: { get_param: "OS::stack_id" }
+      save_private_key: true
+  #Cloud Database
+  wordpress_database:
+    type: OS::Trove::Instance
+    properties:
+      name:
+        str_replace:
+          template: stack_Database
+          params:
+            stack: { get_param: "OS::stack_name" }
+      flavor: 1GB Instance
+      size: 5
+      datastore_type: mysql
+      datastore_version: "5.6"
+      databases:
+      - name: wordpress
+      users:
+      - name: wordpress
+        password: { get_attr: [database_pass, value] }
+        databases: [wordpress]
+      - name: holland
+        password: { get_attr: [holland_pass, value] }
+        databases: [wordpress]
+  #Software Configurations
+  upload_role_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      outputs:
+      - name: results
+      config: |
+        #!/bin/bash
+        set -e
+        git clone --progress https://github.com/chrishultin/ansible-roles.git /etc/ansible/roles > $heat_outputs_path.results 2>&1
+
+  wordpress_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ansible
+      inputs:
+      - default: "[]"
+        name: lsync_servers
+        type: CommaDelimitedList
+      - default: "[]"
+        name: firewall_nodes
+        type: CommaDelimitedList
+      - default: "[]"
+        name: firewall_node_rules
+        type: CommaDelimitedList
+      config: |
+        ---
+        - name: Install and configure WordPress
+          hosts: localhost
+          connection: local
+          roles:
+          - common
+          - apache
+          - php
+          - holland
+          - wordpress
+          - firewall
+          - lsync
+          - phpmyadmin
+  deploy_roles:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: TEMP_URL_SIGNAL
+      config:
+        get_resource: upload_role_config
+      server:
+        get_resource: wordpress_server
+  deploy_wordpress:
+    type: OS::Heat::SoftwareDeployment
+    depends_on: deploy_roles
+    properties:
+      signal_transport: TEMP_URL_SIGNAL
+      input_values:
+        apache_default_domain: { get_param: wordpress_url }
+        tz: "America/Chicago"
+        holland_mysql_user: "holland"
+        holland_mysql_password: {  get_attr: [holland_pass, value] }
+        holland_mysql_host: { get_attr: [wordpress_database, hostname] }
+        holland_create_user: "no"
+        wordpress_db_host: { get_attr: [wordpress_database, hostname] }
+        wordpress_db_name: "wordpress"
+        wordpress_db_user: "wordpress"
+        wordpress_db_pass: { get_attr: [database_pass, value] }
+        wordpress_domain: { get_param: wordpress_url }
+        wordpress_sitename: { get_param: wordpress_sitename }
+        wordpress_user: { get_param: wordpress_user }
+        wordpress_user_pass: { get_attr: [wordpress_pass, value] }
+        wordpress_user_email: { get_param: wordpress_email }
+        lsync_private_key: { get_attr: [ssh_key, private_key] }
+        lsync_servers: { get_attr: [wordpress_secondary, private_ip] }
+        firewall_global_rules: [ "0.0.0.0,0,22,tcp", "0.0.0.0,0,80,tcp", "0.0.0.0,0,443,tcp"]
+        firewall_nodes: { get_attr: [wordpress_secondary, private_ip] }
+        firewall_node_rules: []
+        phpmyadmin_host: { get_attr: [wordpress_database, hostname] }
+      config:
+        get_resource: wordpress_config
+      server:
+        get_resource: wordpress_server
+  #Master Server
+  wordpress_server:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: "OS::stack_name" }
+      image: { get_param: server_image }
+      flavor: { get_param: server_flavor }
+      key_name: { get_resource: ssh_key }
+      software_config_transport: POLL_TEMP_URL
+      config_drive: true
+      user_data_format: SOFTWARE_CONFIG
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+        build_config: "backup_agent_only,monitoring_defaults"
+  #Monitoring Checks
+  wordpress_server_http_check:
+    type: Rackspace::CloudMonitoring::Check
+    depends_on: deploy_wordpress
+    properties:
+      entity: { get_resource: wordpress_server }
+      type: remote.http
+      label:
+        str_replace:
+          template: stack Master HTTP Check
+          params:
+            stack: { get_param: "OS::stack_name" }
+      details:
+        url:
+          str_replace:
+            template: "http://ipaddr"
+            params:
+              ipaddr: { get_attr: [wordpress_server, accessIPv4] }
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+        stack-name: { get_param: "OS::stack_name" }
+      period: 120
+      timeout: 10
+      monitoring_zones_poll:
+      - Northern Virginia (IAD)
+      - Chicago (ORD)
+      - Dallas Fort Worth (DFW)
+      - London (LON)
+      target_hostname: { get_attr: [wordpress_server, accessIPv4] }
+      target_receiver: IPv4
+  load_balancer_http_check:
+    type: Rackspace::CloudMonitoring::Check
+    depends_on: load_balancer
+    properties:
+      entity: { get_resource: wordpress_server }
+      type: remote.http
+      label:
+        str_replace:
+          template: stack Load Balancer HTTP Check
+          params:
+            stack: { get_param: "OS::stack_name" }
+      details:
+        url:
+          str_replace:
+            template: "http://ipaddr"
+            params:
+              ipaddr: { get_attr: [load_balancer, PublicIp] }
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+        stack-name: { get_param: "OS::stack_name" }
+      period: 120
+      timeout: 10
+      monitoring_zones_poll:
+      - Northern Virginia (IAD)
+      - Chicago (ORD)
+      - Dallas Fort Worth (DFW)
+      - London (LON)
+      target_hostname: { get_attr: [load_balancer, PublicIp] }
+      target_receiver: IPv4
+  #Cloud Backup
+  wordpress_backup:
+    type: Rackspace::Cloud::BackupConfig
+    depends_on: wordpress_server
+    properties:
+      host_ip_address: { get_attr: [wordpress_server, accessIPv4] }
+      BackupConfigurationName:
+        str_replace:
+          template: stack Weekly Backup
+          params:
+            stack: { get_param: "OS::stack_name" }
+      Inclusions:
+      - FilePath: "/var/spool/holland"
+        FileItemType: "Folder"
+      - FilePath: "/var/www"
+        FileItemType: "Folder"
+      NotifyFailure: true
+      NotifyRecipients: { get_param: wordpress_email }
+      TimeZoneId: Central Standard Time
+      StartTimeAmPm: AM
+      StartTimeHour: 1
+      StartTimeMinute: 0
+      HourInterval: null
+      DayOfWeekId: 0
+      Frequency: "Weekly"
+      VersionRetention: 30
+  #Secondary Server
+  wordpress_secondary:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: server_count }
+      resource_def:
+        type: https://github.com/rackspace-orchestration-templates/wordpress-small/blob/master/wordpress-small-secondary.yaml
+        properties:
+          ssh_key: { get_resource: ssh_key }
+          parent_stack_id: { get_param: "OS::stack_id" }
+          server_image: { get_param: server_image }
+          server_flavor: { get_param: server_flavor }
+          apache_default_domain: { get_param: wordpress_url }
+          server_name:
+            str_replace:
+              template: stack-secondary-%index%
+              params:
+                stack: { get_param: "OS::stack_name" }
+  #Cloud Load Balancer
+  load_balancer:
+    type: Rackspace::Cloud::LoadBalancer
+    depends_on:
+    - deploy_wordpress
+    - wordpress_secondary
+    properties:
+      name:
+        str_replace:
+          template: stack_Load_Balancer
+          params:
+            stack: { get_param: "OS::stack_name" }
+      nodes:
+      - addresses: [ { get_attr: [wordpress_server, networks, private, 0] } ]
+        port: 80
+        condition: ENABLED
+      - addresses: { get_attr: [wordpress_secondary, private_ip] }
+        port: 80
+        condition: ENABLED
+      port: 80
+      protocol: HTTP
+      algorithm: ROUND_ROBIN
+      contentCaching: ENABLED
+      sessionPersistence: HTTP_COOKIE
+      virtualIps:
+      - type: PUBLIC
+        ipVersion: IPV4
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+
+outputs:
+  wordpress_login_user:
+    description: WordPress Admin User
+    value:
+      get_param: wordpress_user
+  wordpress_login_password:
+    description: WordPress Admin Password
+    value:
+      get_attr: [wordpress_pass, value]
+  wordpress_public_ip:
+    description: Load Balancer IP
+    value:
+      get_attr: [load_balancer, PublicIp]
+  wordpress_admin_url:
+    description: WordPress Admin URL
+    value:
+      str_replace:
+        template: "https://domain/wp-admin/"
+        params:
+          domain: { get_param: wordpress_url }
+  wordpress_public_url:
+    description: WordPress Public URL
+    value:
+      str_replace:
+        template: "http://domain/"
+        params:
+          domain: { get_param: wordpress_url }
+  phpmyadmin_url:
+    description: PHPMyAdmin URL
+    value:
+      str_replace:
+        template: "https://IP/phpmyadmin/"
+        params:
+          IP:
+            get_attr: [wordpress_server, accessIPv4]
+  mysql_user:
+    description: Database User
+    value: "wordpress"
+  mysql_password:
+    description: Database Password
+    value:
+      get_attr: [database_pass, value]
+  ssh_private_key:
+    description: SSH Private Key
+    value:
+      get_attr: [ssh_key, private_key]
+  server_ip:
+    description: Server Public IP
+    value:
+      get_attr: [wordpress_server, accessIPv4]
+  secondary_ips:
+    description: Secondary Node IPs
+    value:
+      get_attr: [wordpress_secondary, public_ip]
