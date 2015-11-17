@@ -4,7 +4,7 @@ description: |
  #### Production
  
  This stack is intended for low to medium traffic production
- websites and can be scaled as needed to accomodate future
+ websites and can be scaled as needed to accommodate future
  growth.  This stack includes a Cloud Load Balancer, Cloud
  Database, and a Master server (plus optional secondary
  servers).  It also includes Cloud Monitoring and Cloud

@@ -121,7 +121,7 @@ instructions: |
   You can add additional servers to this deployment by updating the
   "server_count" parameter for this stack. This deployment is
   intended for low to medium traffic production websites and can be
-  scaled as needed to accomodate future growth.
+  scaled as needed to accommodate future growth.
   
   This stack will not ensure that WordPress or the servers themselves are
   up-to-date.  You are responsible for ensuring that all software is
@@ -129,11 +129,16 @@ instructions: |
 
 user-input-required: true
 description: |
-  A single Linux server running
-  [WordPress v3.9.2](http://wordpress.org/about/),
-  [Apache](http://httpd.apache.org/),
-  [vsftpd](https://security.appspot.com/vsftpd.html#about),
-  [Varnish](https://www.varnish-cache.org/about),
-  with a Cloud Load Balancer and Cloud Database as the backend.
-  There is not an automatic way to add additional nodes to this deployment.
-  This deployment is meant for lower traffic or testing scenarios.
+ This stack is intended for low to medium traffic production
+ websites and can be scaled as needed to accommodate future
+ growth.  This stack includes a Cloud Load Balancer, Cloud
+ Database, and a Master server (plus optional secondary
+ servers).  It also includes Cloud Monitoring and Cloud
+ Backups.
+
+ This stack is running the latest version of
+ [WordPress](http://wordpress.org/about/),
+ [Apache](http://httpd.apache.org/),
+ and [PHP](http://php.net/).
+ with a Cloud Database running
+ [MySQL 5.6](http://www.mysql.com/about/).
