@@ -61,6 +61,7 @@ parameters:
     description: Flavor of Cloud Server to use for WordPress
     constraints:
     - allowed_values:
+      - 1 GB General Purpose v1
       - 2 GB General Purpose v1
       - 4 GB General Purpose v1
       - 8 GB General Purpose v1
