@@ -76,8 +76,8 @@ instructions: |
   is updated.**
 
   WordPress itself was installed using [WP-CLI](http://wp-cli.org/). WordPress
-  is installed in /var/www/vhosts/YOUR DOMAIN/ and served by [Apache](http://httpd.apache.org/).
-  The Apache configuration file will be named using the domain name used as a
+  is installed in /var/www/vhosts/YOUR DOMAIN/ and served by [nginx](https://www.nginx.com/).
+  The nginx configuration file will be named using the domain name used as a
   part of this deployment (for example, domain.com.conf).
 
   Because this stack is intended for lower-traffic deployments, there is no
@@ -102,7 +102,7 @@ instructions: |
   to the Cloud Database via the MySQL client.  For more assistance, please
   contact your Support team.
 
-  Monitoring is configured to verify that Apache is running on both the Master
+  Monitoring is configured to verify that nginx is running on both the Master
   and all secondary servers, as well as that the Cloud Load Balancer is
   functioning.  Additionally, the default CPU, RAM, and Filesystem checks
   are in place on all servers.
@@ -138,7 +138,7 @@ description: |
 
  This stack is running the latest version of
  [WordPress](http://wordpress.org/about/),
- [Apache](http://httpd.apache.org/),
- and [PHP](http://php.net/).
+ [nginx](https://www.nginx.com/),
+ and [PHP FPM](http://php-fpm.org/).
  with a Cloud Database running
  [MySQL 5.6](http://www.mysql.com/about/).

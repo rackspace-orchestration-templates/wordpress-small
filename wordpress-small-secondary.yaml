@@ -1,7 +1,7 @@
 heat_template_version: 2015-10-15
 
 description: |
- #### WordPress, Slave
+ #### WordPress Secondary
 
 parameter_groups:
 
@@ -20,10 +20,10 @@ parameters:
       - 8 GB General Purpose v1
   server_image:
     type: string
-    default: 29861fa3-ca6d-4c78-a68b-a69fd7024ab9
+    default: 96a06fc9-c230-422c-81d4-562f97517a5b
     constraints:
     - allowed_values:
-      - 29861fa3-ca6d-4c78-a68b-a69fd7024ab9
+      - 96a06fc9-c230-422c-81d4-562f97517a5b
   ssh_key:
     type: string
     label: SSH Key
@@ -81,8 +81,6 @@ resources:
         get_resource: wordpress_config
       server:
         get_resource: wordpress_server
-  bootstrap:
-    type: "https://raw.githubusercontent.com/chrishultin/ansible-templates/master/bootconfig_ansible_new.yaml"
   wordpress_server:
     type: OS::Nova::Server
     properties:
@@ -93,7 +91,6 @@ resources:
       software_config_transport: POLL_TEMP_URL
       config_drive: true
       user_data_format: SOFTWARE_CONFIG
-      user_data: { get_attr: [ bootstrap, config ] }
       metadata:
         rax-heat: { get_param: "parent_stack_id" }
         build_config: "monitoring_defaults"
