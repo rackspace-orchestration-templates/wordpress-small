@@ -173,6 +173,7 @@ resources:
       input_values:
         nginx_vhost_str: { get_param: wordpress_url }
         nginx_vhost_template: "wordpress"
+        nginx_vhost_phpmyadmin: "true"
         tz: "America/Chicago"
         holland_mysql_user: "holland"
         holland_mysql_password: {  get_attr: [holland_pass, value] }
