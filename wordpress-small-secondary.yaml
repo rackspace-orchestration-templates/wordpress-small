@@ -20,10 +20,10 @@ parameters:
       - 8 GB General Purpose v1
   server_image:
     type: string
-    default: 96a06fc9-c230-422c-81d4-562f97517a5b
+    default: f4bbbce2-50b0-4b07-bf09-96c175a45f4b
     constraints:
     - allowed_values:
-      - 96a06fc9-c230-422c-81d4-562f97517a5b
+      - f4bbbce2-50b0-4b07-bf09-96c175a45f4b
   ssh_key:
     type: string
     label: SSH Key
@@ -34,7 +34,8 @@ parameters:
   apache_default_domain:
     type: string
     default: exmaple.com
-
+  master_server:
+    type: string
 resources:
   upload_role_config:
     type: OS::Heat::SoftwareConfig
@@ -45,7 +46,7 @@ resources:
       config: |
         #!/bin/bash
         set -e
-        git clone -b 'stable' --single-branch --progress https://github.com/chrishultin/ansible-roles.git /etc/ansible/roles > $heat_outputs_path.results 2>&1
+        git clone -b 'update-standardization' --single-branch --progress https://github.com/rackspace-orchestration-templates/ansible-roles.git /etc/ansible/roles > $heat_outputs_path.results 2>&1
 
   wordpress_config:
     type: OS::Heat::SoftwareConfig
@@ -58,8 +59,8 @@ resources:
           connection: local
           roles:
           - common
-          - apache
-          - php
+          - nginx
+          - php-fpm
           - firewall
   deploy_roles:
     type: OS::Heat::SoftwareDeployment
@@ -75,7 +76,10 @@ resources:
     properties:
       signal_transport: TEMP_URL_SIGNAL
       input_values:
-        apache_default_domain: { get_param: apache_default_domain }
+        nginx_vhost_str: { get_param: apache_default_domain }
+        nginx_vhost_template: 'wordpress_secondary'
+        nginx_vhost_phpmyadmin: "True"
+        nginx_upstream_server: { get_param: master_server }
         tz: "America/Chicago"
       config:
         get_resource: wordpress_config
