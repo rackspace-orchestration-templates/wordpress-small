@@ -54,7 +54,7 @@ parameters:
     label: WordPress Admin E-mail
     description: E-mail Address for WordPress Admin User
   #Advanced Options
-  server_flavor:
+  flavor:
     type: string
     default: 4 GB General Purpose v1
     label: Server Flavor
@@ -227,7 +227,7 @@ resources:
       name: { get_param: "OS::stack_name" }
 #      image: { get_param: server_image }
       image: f4bbbce2-50b0-4b07-bf09-96c175a45f4b
-      flavor: { get_param: server_flavor }
+      flavor: { get_param: flavor }
       key_name: { get_resource: ssh_key }
       software_config_transport: POLL_TEMP_URL
       config_drive: true
@@ -333,7 +333,7 @@ resources:
           parent_stack_id: { get_param: "OS::stack_id" }
 #          server_image: { get_param: server_image }
           server_image: f4bbbce2-50b0-4b07-bf09-96c175a45f4b
-          server_flavor: { get_param: server_flavor }
+          server_flavor: { get_param: flavor }
           apache_default_domain: { get_param: wordpress_url }
           server_name:
             str_replace:
