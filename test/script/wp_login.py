@@ -14,7 +14,7 @@ class WPInteraction(object):
         self.login_id = login_id
         self.password = password
         self.session = requests.Session()
-        self.session.headers.update({"Host": self.domain})
+        self.session.headers.update({"Host": self.domain[7:-1]})
 
     def get_login_page(self):
         url = "http://{}".format(self.ip)
@@ -30,7 +30,7 @@ class WPInteraction(object):
         r = self.session.post(url, data=data, allow_redirects=False)
         if r.is_redirect:
             redirected_url = r.headers.get('location')
-            r = self.session.get(re.sub(self.domain, self.ip, redirected_url))
+            r = self.session.get(re.sub(self.domain, "http://" + self.ip + "/", redirected_url))
         print "status code is {}".format(r.status_code)
         return r.text
 
