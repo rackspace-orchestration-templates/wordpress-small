@@ -122,6 +122,11 @@ instructions: |
   "server_count" parameter for this stack. This deployment is
   intended for low to medium traffic production websites and can be
   scaled as needed to accommodate future growth.
+
+  When scaling this deployment by adjusting the "server_count" parameter,
+  make sure that you DO NOT change the "database_flavor" and "database_disk"
+  parameters, as this will result in the loss of all data within the
+  database.
   
   This stack will not ensure that WordPress or the servers themselves are
   up-to-date.  You are responsible for ensuring that all software is
