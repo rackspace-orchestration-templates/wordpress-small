@@ -153,7 +153,7 @@ resources:
       config: |
         #!/bin/bash
         set -e
-        git clone -b 'stable' --single-branch --progress https://github.com/rackspace-orchestration-templates/ansible-roles.git /etc/ansible/roles > $heat_outputs_path.results 2>&1
+        git clone -b 'master' --single-branch --progress https://github.com/rackspace-orchestration-templates/ansible-roles.git /etc/ansible/roles > $heat_outputs_path.results 2>&
 
   wordpress_config:
     type: OS::Heat::SoftwareConfig
@@ -226,6 +226,8 @@ resources:
         wordpress_user_pass: { get_attr: [wordpress_pass, value] }
         wordpress_user_email: { get_param: wordpress_email }
         phpmyadmin_host: { get_attr: [wordpress_database, hostname] }
+        phpmyadmin_user: "wordpress"
+        phpmyadmin_pass: { get_attr: [database_pass, value] }
       config:
         get_resource: wordpress_config
       server:
