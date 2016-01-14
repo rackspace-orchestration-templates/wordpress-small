@@ -135,13 +135,14 @@ resources:
       datastore_version: "5.1"
       databases:
       - name: wordpress
+      - name: phpmyadmin
       users:
       - name: wordpress
         password: { get_attr: [database_pass, value] }
-        databases: [wordpress]
+        databases: [wordpress, phpmyadmin]
       - name: holland
         password: { get_attr: [holland_pass, value] }
-        databases: [wordpress]
+        databases: [wordpress, phpmyadmin]
   #Software Configurations
   upload_role_config:
     type: OS::Heat::SoftwareConfig
