@@ -24,7 +24,6 @@ def check():
         assert service.is_enabled('php5-fpm'), 'php-fpm is not enabled'
 
     if ("secondary" not in socket.gethostname()):
-        assert process.is_up('lsyncd'), 'lsyncd is not running'
         assert service.is_enabled('lsyncd'), 'lsyncd is not enabled'
 
 
