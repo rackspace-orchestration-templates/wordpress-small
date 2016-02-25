@@ -111,15 +111,6 @@ test-cases:
                 - { get_output: wordpress_public_url }
                 - { get_output: wordpress_login_user }
                 - { get_output: wordpress_login_password }
-    - check_secondary_login:
-        script:
-          commands:
-            - command: "./test/script/wp_login.py"
-              command_args:
-                - { get_output: secondary_ips }
-                - { get_output: wordpress_public_url }
-                - { get_output: wordpress_login_user }
-                - { get_output: wordpress_login_password }
     - master_server:
         fabric:
           # Fabric environment settings to use while running envassert script
