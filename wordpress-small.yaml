@@ -111,7 +111,7 @@ parameters:
       - range: { min: 0, max: 10 }
   secondary_template:
     type: string
-    default: https://raw.githubusercontent.com/rackspace-orchestration-templates/wordpress-small/master/wordpress-small-secondary.yaml
+    default: https://raw.githubusercontent.com/rackspace-orchestration-templates/wordpress-small/stable/wordpress-small-secondary.yaml
     label: Secondary Template
     description: Template to use for secondary servers
   ansible_branch:
@@ -349,7 +349,8 @@ resources:
     type: Rackspace::Cloud::BackupConfig
     depends_on: wordpress_server
     properties:
-      host_ip_address: { get_attr: [wordpress_server, accessIPv4] }
+      #host_ip_address: { get_attr: [wordpress_server, accessIPv4] }
+      server: { get_resource: wordpress_server }
       BackupConfigurationName:
         str_replace:
           template: stack Weekly Backup
