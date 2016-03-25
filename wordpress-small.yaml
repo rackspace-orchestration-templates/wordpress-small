@@ -125,7 +125,6 @@ parameters:
     label: Git Repo for Ansible Roles
     description: The Ansible Roles will be pulled from Git, using the repo provided
 
-
 resources:
   #Passwords
   wordpress_pass:
