@@ -47,7 +47,7 @@ parameters:
   #   immutable: true
   ansible_source:
     type: string
-    default: http://catlog.rs-heat.com/ansible-roles/ansible-roles.tar.gz
+    default: http://catalog.rs-heat.com/ansible-roles/ansible-roles.tar.gz
     label: Ansible Tarball
     description: The Ansible Roles will be pulled from the location provided
     immutable: true
@@ -65,7 +65,7 @@ resources:
             set -e
             mkdir -p /etc/ansible/roles
             wget ansible_source -O /tmp/ansible-roles.tar.gz 2>&1
-            tar -xf /tmp/ansible-roles.tar.gz --strip-components=1 /etc/ansible/roles
+            tar -xf /tmp/ansible-roles.tar.gz --strip-components=1 -C /etc/ansible/roles
           params:
             ansible_source: { get_param: ansible_source }
 
