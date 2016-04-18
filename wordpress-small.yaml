@@ -28,7 +28,6 @@ parameter_groups:
   parameters:
   - server_image
   - secondary_template
-  # - ansible_branch
   - ansible_source
 
 parameters:
@@ -117,17 +116,10 @@ parameters:
       - range: { min: 0, max: 10 }
   secondary_template:
     type: string
-    #default: https://raw.githubusercontent.com/rackspace-orchestration-templates/wordpress-small/stable/wordpress-small-secondary.yaml
     default: http://catalog.rs-heat.com/wordpress-small/wordpress-small-secondary.yaml
     label: Secondary Template
     description: Template to use for secondary servers
     immutable: true
-  # ansible_branch:
-  #   type: string
-  #   default: stable
-  #   label: Git Branch or Tag for Ansible Roles
-  #   description: The Ansible Roles will be pulled from Git, using the tag or branch provided
-  #   immutable: true
   ansible_source:
     type: string
     default: http://catalog.rs-heat.com/ansible-roles/ansible-roles.tar.gz

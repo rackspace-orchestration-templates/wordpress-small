@@ -39,12 +39,6 @@ parameters:
   ansible_branch:
     type: string
     default: stable
-  # ansible_branch:
-  #   type: string
-  #   default: stable
-  #   label: Git Branch or Tag for Ansible Roles
-  #   description: The Ansible Roles will be pulled from Git, using the tag or branch provided
-  #   immutable: true
   ansible_source:
     type: string
     default: http://catalog.rs-heat.com/ansible-roles/ansible-roles.tar.gz
