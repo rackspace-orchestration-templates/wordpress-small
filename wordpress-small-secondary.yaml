@@ -36,9 +36,6 @@ parameters:
     default: exmaple.com
   master_server:
     type: string
-  ansible_branch:
-    type: string
-    default: stable
   ansible_source:
     type: string
     default: http://catalog.rs-heat.com/ansible-roles/ansible-roles.tar.gz
