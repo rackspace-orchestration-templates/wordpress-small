@@ -91,18 +91,9 @@ When uploading content, it only needs to be uploaded to the Master node,
 and will be automatically synchronized to all secondary nodes.
 
 MySQL is being hosted on a Cloud Database instance, running MySQL 5.6.
-Backups for MySQL are provided by [Holland](http://wiki.hollandbackup.org/),
-which is running on the Master server.
-
 Backups are configured using Cloud Backups.  The Master server is configured
-to back up /var/spool/holland and /var/www once per week, and to retain
+to back up /var/www once per week, and to retain
 these backups for 30 days.
-
-In order to restore the Database from backup, you will need to first restore
-/var/spool/holland from the appropriate Cloud Backup.  After you have done so,
-you will need to log into the Master server and restore the Holland backup
-to the Cloud Database via the MySQL client.  For more assistance, please
-contact your Support team.
 
 Monitoring is configured to verify that nginx is running on both the Master
 and all secondary servers, as well as that the Cloud Load Balancer is
@@ -181,17 +172,17 @@ Outputs
 Once a stack comes online, use `heat output-list` to see all available outputs.
 Use `heat output-show <OUTPUT NAME>` to get the value of a specific output.
 
-* `wordpress_login_user`: WordPress Admin User 
-* `wordpress_login_password`: WordPress Admin Password 
-* `wordpress_public_ip`: Load Balancer IP 
-* `wordpress_admin_url`: WordPress Admin URL 
-* `wordpress_public_url`: WordPress Public URL 
-* `phpmyadmin_url`: PHPMyAdmin URL 
-* `mysql_user`: Database User 
-* `mysql_password`: Database Password 
-* `ssh_private_key`: SSH Private Key 
-* `server_ip`: Server Public IP 
-* `secondary_ips`: Secondary Node IPs 
+* `wordpress_login_user`: WordPress Admin User
+* `wordpress_login_password`: WordPress Admin Password
+* `wordpress_public_ip`: Load Balancer IP
+* `wordpress_admin_url`: WordPress Admin URL
+* `wordpress_public_url`: WordPress Public URL
+* `phpmyadmin_url`: PHPMyAdmin URL
+* `mysql_user`: Database User
+* `mysql_password`: Database Password
+* `ssh_private_key`: SSH Private Key
+* `server_ip`: Server Public IP
+* `secondary_ips`: Secondary Node IPs
 
 For multi-line values, the response will come in an escaped form. To get rid of
 the escapes, use `echo -e '<STRING>' > file.txt`. For vim users, a substitution
